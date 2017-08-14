@@ -1,10 +1,11 @@
 #ifndef __GALEOS_H__
 #define __GALEOS_H__
 
-#include <linux/init.h>             // Macros used to mark up functions e.g., __init __exit
-#include <linux/module.h>           // Core header for loading LKMs into the kernel
-#include <linux/kernel.h>           // Contains types, macros, functions for the kernel
+#include <linux/init.h>
+#include <linux/module.h>
+#include <linux/kernel.h>
 #include <linux/timer.h>
+#include <linux/fs.h>
 #include <linux/spi/spi.h>
 #include <linux/of_device.h>
 #include <linux/of_gpio.h>
@@ -18,7 +19,7 @@
 typedef struct galeos_data_s {
   struct list_head  device_entry;
   spinlock_t  spin_lock;
-  struct mutex mutex_lock;
+  struct mutex spi_lock;
   struct device *device;
   struct spi_device *spi;
   struct spi_message  spi_message;
