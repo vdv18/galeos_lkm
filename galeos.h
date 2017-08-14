@@ -9,6 +9,7 @@
 #include <linux/spi/spi.h>
 #include <linux/of_device.h>
 #include <linux/of_gpio.h>
+#include <linux/gpio.h>
 
 #include <linux/sched.h>
 #include <linux/kthread.h>
@@ -33,6 +34,8 @@ typedef struct galeos_data_s {
   int gpio_reset;
   int gpio_irq;
   int gpio_rdy;
+  /* IRQ*/
+  int irq;
   /**/
   int id;
 } galeosdev_data_t;
@@ -49,6 +52,8 @@ typedef struct {
 #define GALEOS_DEVICE_NAME "shdsl"
 #define GALEOS_CLASS_NAME  "galeos"
 #define GALEOS_WORKQUEUE_NAME GALEOS_CLASS_NAME "-" GALEOS_DRIVER_NAME
+
+#define GALEOS_FILE_SETTINGS "/etc/galeos/default.conf"
 
 #define GALEOS_DRIVER_VERSION_MAJ 0
 #define GALEOS_DRIVER_VERSION_MIN 2

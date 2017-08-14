@@ -1,7 +1,8 @@
 #include <linux/init.h>             // Macros used to mark up functions e.g., __init __exit
 #include <linux/module.h>           // Core header for loading LKMs into the kernel
 #include <linux/fs.h>
-
+#include <linux/interrupt.h>
+#include <asm/uaccess.h>
 #include "galeos.h"
 
 MODULE_LICENSE("GPL");
@@ -162,26 +163,25 @@ static struct attribute *dev_attrs[] = {
   NULL,
 };
 
-
-static ssize_t show_speed(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t show_frate(struct device *dev, struct device_attribute *attr, char *buf)
 {
   u8  page;
   int data;
   galeosdev_data_t *device_data = dev_get_drvdata(dev);
   page = galeos_register_read(device_data, (u8)(0x7F));
-  if(strcmp(attr->attr.name, "speed0") == 0)
+  if(strcmp(attr->attr.name, "frate0") == 0)
   {
     galeos_register_write(device_data, 0x7F, 0x00);
   }
-  else if(strcmp(attr->attr.name, "speed1") == 0)
+  else if(strcmp(attr->attr.name, "frate1") == 0)
   {
     galeos_register_write(device_data, 0x7F, 0x01);
   }
-  else if(strcmp(attr->attr.name, "speed2") == 0)
+  else if(strcmp(attr->attr.name, "frate2") == 0)
   {
     galeos_register_write(device_data, 0x7F, 0x02);
   }
-  else if(strcmp(attr->attr.name, "speed3") == 0)
+  else if(strcmp(attr->attr.name, "frate3") == 0)
   {
     galeos_register_write(device_data, 0x7F, 0x03);
   }
@@ -191,26 +191,26 @@ static ssize_t show_speed(struct device *dev, struct device_attribute *attr, cha
   return scnprintf(buf, PAGE_SIZE, "%d\n", (int)data);
 }
 
-static ssize_t store_speed(struct device *dev, struct device_attribute *attr,
+static ssize_t store_frate(struct device *dev, struct device_attribute *attr,
                           const char *buf, size_t count)
 {
   unsigned int data;
   galeosdev_data_t *device_data = dev_get_drvdata(dev);
   u8  page;
   page = galeos_register_read(device_data, (u8)(0x7F));
-  if(strcmp(attr->attr.name, "speed0") == 0)
+  if(strcmp(attr->attr.name, "frate0") == 0)
   {
     galeos_register_write(device_data, 0x7F, 0x00);
   }
-  else if(strcmp(attr->attr.name, "speed1") == 0)
+  else if(strcmp(attr->attr.name, "frate1") == 0)
   {
     galeos_register_write(device_data, 0x7F, 0x01);
   }
-  else if(strcmp(attr->attr.name, "speed2") == 0)
+  else if(strcmp(attr->attr.name, "frate2") == 0)
   {
     galeos_register_write(device_data, 0x7F, 0x02);
   }
-  else if(strcmp(attr->attr.name, "speed3") == 0)
+  else if(strcmp(attr->attr.name, "frate3") == 0)
   {
     galeos_register_write(device_data, 0x7F, 0x03);
   }
@@ -222,10 +222,10 @@ static ssize_t store_speed(struct device *dev, struct device_attribute *attr,
   return strlen(buf);
 }
 
-static DEVICE_ATTR(speed0, S_IRUGO | S_IWUSR, show_speed, store_speed);
-static DEVICE_ATTR(speed1, S_IRUGO | S_IWUSR, show_speed, store_speed);
-static DEVICE_ATTR(speed2, S_IRUGO | S_IWUSR, show_speed, store_speed);
-static DEVICE_ATTR(speed3, S_IRUGO | S_IWUSR, show_speed, store_speed);
+static DEVICE_ATTR(frate0, S_IRUGO | S_IWUSR, show_frate, store_frate);
+static DEVICE_ATTR(frate1, S_IRUGO | S_IWUSR, show_frate, store_frate);
+static DEVICE_ATTR(frate2, S_IRUGO | S_IWUSR, show_frate, store_frate);
+static DEVICE_ATTR(frate3, S_IRUGO | S_IWUSR, show_frate, store_frate);
 
 static ssize_t show_mode(struct device *dev, struct device_attribute *attr, char *buf)
 {
@@ -308,25 +308,25 @@ static DEVICE_ATTR(mode1, S_IRUGO | S_IWUSR, show_mode, store_mode);
 static DEVICE_ATTR(mode2, S_IRUGO | S_IWUSR, show_mode, store_mode);
 static DEVICE_ATTR(mode3, S_IRUGO | S_IWUSR, show_mode, store_mode);
 
-static ssize_t show_pam(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t show_fpam(struct device *dev, struct device_attribute *attr, char *buf)
 {
   u8  page;
   int data;
   galeosdev_data_t *device_data = dev_get_drvdata(dev);
   page = galeos_register_read(device_data, (u8)(0x7F));
-  if(strcmp(attr->attr.name, "pam0") == 0)
+  if(strcmp(attr->attr.name, "fpam0") == 0)
   {
     galeos_register_write(device_data, 0x7F, 0x00);
   }
-  else if(strcmp(attr->attr.name, "pam1") == 0)
+  else if(strcmp(attr->attr.name, "fpam1") == 0)
   {
     galeos_register_write(device_data, 0x7F, 0x01);
   }
-  else if(strcmp(attr->attr.name, "pam2") == 0)
+  else if(strcmp(attr->attr.name, "fpam2") == 0)
   {
     galeos_register_write(device_data, 0x7F, 0x02);
   }
-  else if(strcmp(attr->attr.name, "pam3") == 0)
+  else if(strcmp(attr->attr.name, "fpam3") == 0)
   {
     galeos_register_write(device_data, 0x7F, 0x03);
   }
@@ -335,26 +335,26 @@ static ssize_t show_pam(struct device *dev, struct device_attribute *attr, char 
   return scnprintf(buf, PAGE_SIZE, "%d\n", (int)data);
 }
 
-static ssize_t store_pam(struct device *dev, struct device_attribute *attr,
+static ssize_t store_fpam(struct device *dev, struct device_attribute *attr,
                           const char *buf, size_t count)
 {
   unsigned int data;
   galeosdev_data_t *device_data = dev_get_drvdata(dev);
   u8  page;
   page = galeos_register_read(device_data, (u8)(0x7F));
-  if(strcmp(attr->attr.name, "pam0") == 0)
+  if(strcmp(attr->attr.name, "fpam0") == 0)
   {
     galeos_register_write(device_data, 0x7F, 0x00);
   }
-  else if(strcmp(attr->attr.name, "pam1") == 0)
+  else if(strcmp(attr->attr.name, "fpam1") == 0)
   {
     galeos_register_write(device_data, 0x7F, 0x01);
   }
-  else if(strcmp(attr->attr.name, "pam2") == 0)
+  else if(strcmp(attr->attr.name, "fpam2") == 0)
   {
     galeos_register_write(device_data, 0x7F, 0x02);
   }
-  else if(strcmp(attr->attr.name, "pam3") == 0)
+  else if(strcmp(attr->attr.name, "fpam3") == 0)
   {
     galeos_register_write(device_data, 0x7F, 0x03);
   }
@@ -372,25 +372,135 @@ static ssize_t store_pam(struct device *dev, struct device_attribute *attr,
   return strlen(buf);
 }
 
-static DEVICE_ATTR(pam0, S_IRUGO | S_IWUSR, show_pam, store_pam);
-static DEVICE_ATTR(pam1, S_IRUGO | S_IWUSR, show_pam, store_pam);
-static DEVICE_ATTR(pam2, S_IRUGO | S_IWUSR, show_pam, store_pam);
-static DEVICE_ATTR(pam3, S_IRUGO | S_IWUSR, show_pam, store_pam);
+static DEVICE_ATTR(fpam0, S_IRUGO | S_IWUSR, show_fpam, store_fpam);
+static DEVICE_ATTR(fpam1, S_IRUGO | S_IWUSR, show_fpam, store_fpam);
+static DEVICE_ATTR(fpam2, S_IRUGO | S_IWUSR, show_fpam, store_fpam);
+static DEVICE_ATTR(fpam3, S_IRUGO | S_IWUSR, show_fpam, store_fpam);
+
+static ssize_t show_prate(struct device *dev, struct device_attribute *attr, char *buf)
+{
+  u8  page;
+  int data;
+  galeosdev_data_t *device_data = dev_get_drvdata(dev);
+  page = galeos_register_read(device_data, (u8)(0x7F));
+  if(strcmp(attr->attr.name, "prate0") == 0)
+  {
+    galeos_register_write(device_data, 0x7F, 0x30);
+  }
+  else if(strcmp(attr->attr.name, "prate1") == 0)
+  {
+    galeos_register_write(device_data, 0x7F, 0x31);
+  }
+  else if(strcmp(attr->attr.name, "prate2") == 0)
+  {
+    galeos_register_write(device_data, 0x7F, 0x32);
+  }
+  else if(strcmp(attr->attr.name, "prate3") == 0)
+  {
+    galeos_register_write(device_data, 0x7F, 0x33);
+  }
+  data = galeos_register_read(device_data, (u8)(0x05)) * 64;
+  data += galeos_register_read(device_data, (u8)(0x06)) * 8;
+  galeos_register_write(device_data, 0x7F,page);
+  return scnprintf(buf, PAGE_SIZE, "%d\n", (int)data);
+}
+
+static DEVICE_ATTR(prate0, S_IRUGO, show_prate, 0);
+static DEVICE_ATTR(prate1, S_IRUGO, show_prate, 0);
+static DEVICE_ATTR(prate2, S_IRUGO, show_prate, 0);
+static DEVICE_ATTR(prate3, S_IRUGO, show_prate, 0);
+
+static ssize_t show_ppam(struct device *dev, struct device_attribute *attr, char *buf)
+{
+  u8  page;
+  int data;
+  galeosdev_data_t *device_data = dev_get_drvdata(dev);
+  page = galeos_register_read(device_data, (u8)(0x7F));
+  if(strcmp(attr->attr.name, "ppam0") == 0)
+  {
+    galeos_register_write(device_data, 0x7F, 0x30);
+  }
+  else if(strcmp(attr->attr.name, "ppam1") == 0)
+  {
+    galeos_register_write(device_data, 0x7F, 0x31);
+  }
+  else if(strcmp(attr->attr.name, "ppam2") == 0)
+  {
+    galeos_register_write(device_data, 0x7F, 0x32);
+  }
+  else if(strcmp(attr->attr.name, "ppam3") == 0)
+  {
+    galeos_register_write(device_data, 0x7F, 0x33);
+  }
+  data = galeos_register_read(device_data, (u8)(0x07));
+  galeos_register_write(device_data, 0x7F,page);
+  return scnprintf(buf, PAGE_SIZE, "%d\n", (int)data);
+}
+
+static DEVICE_ATTR(ppam0, S_IRUGO, show_ppam, 0);
+static DEVICE_ATTR(ppam1, S_IRUGO, show_ppam, 0);
+static DEVICE_ATTR(ppam2, S_IRUGO, show_ppam, 0);
+static DEVICE_ATTR(ppam3, S_IRUGO, show_ppam, 0);
+
+static ssize_t show_lstat(struct device *dev, struct device_attribute *attr, char *buf)
+{
+  u8  page;
+  int data;
+  galeosdev_data_t *device_data = dev_get_drvdata(dev);
+  page = galeos_register_read(device_data, (u8)(0x7F));
+  if(strcmp(attr->attr.name, "lstat0") == 0)
+  {
+    galeos_register_write(device_data, 0x7F, 0x30);
+  }
+  else if(strcmp(attr->attr.name, "lstat1") == 0)
+  {
+    galeos_register_write(device_data, 0x7F, 0x31);
+  }
+  else if(strcmp(attr->attr.name, "lstat2") == 0)
+  {
+    galeos_register_write(device_data, 0x7F, 0x32);
+  }
+  else if(strcmp(attr->attr.name, "lstat3") == 0)
+  {
+    galeos_register_write(device_data, 0x7F, 0x33);
+  }
+  data = galeos_register_read(device_data, (u8)(0x07));
+  galeos_register_write(device_data, 0x7F,page);
+  return scnprintf(buf, PAGE_SIZE, "%d\n", (int)data);
+}
+
+static DEVICE_ATTR(lstat0, S_IRUGO, show_lstat, 0);
+static DEVICE_ATTR(lstat1, S_IRUGO, show_lstat, 0);
+static DEVICE_ATTR(lstat2, S_IRUGO, show_lstat, 0);
+static DEVICE_ATTR(lstat3, S_IRUGO, show_lstat, 0);
+
 
 static struct attribute *dev_dsl_attrs[] = {
   /* current configuration's attributes */
-  &dev_attr_speed0.attr,
-  &dev_attr_speed1.attr,
-  &dev_attr_speed2.attr,
-  &dev_attr_speed3.attr,
+  &dev_attr_frate0.attr,
+  &dev_attr_frate1.attr,
+  &dev_attr_frate2.attr,
+  &dev_attr_frate3.attr,
+  &dev_attr_fpam0.attr,
+  &dev_attr_fpam1.attr,
+  &dev_attr_fpam2.attr,
+  &dev_attr_fpam3.attr,
+  &dev_attr_prate0.attr,
+  &dev_attr_prate1.attr,
+  &dev_attr_prate2.attr,
+  &dev_attr_prate3.attr,
+  &dev_attr_ppam0.attr,
+  &dev_attr_ppam1.attr,
+  &dev_attr_ppam2.attr,
+  &dev_attr_ppam3.attr,
   &dev_attr_mode0.attr,
   &dev_attr_mode1.attr,
   &dev_attr_mode2.attr,
   &dev_attr_mode3.attr,
-  &dev_attr_pam0.attr,
-  &dev_attr_pam1.attr,
-  &dev_attr_pam2.attr,
-  &dev_attr_pam3.attr,
+  &dev_attr_lstat0.attr,
+  &dev_attr_lstat1.attr,
+  &dev_attr_lstat2.attr,
+  &dev_attr_lstat3.attr,
   NULL,
 };
 
@@ -398,16 +508,55 @@ static struct attribute_group dev_attr_grp = {
   .attrs = dev_attrs,
 };
 
-static struct attribute_group dev_dsl_attr_grp = {
-  .name  = (const char*)"DSL",
+static struct attribute_group dev_shdsl_attr_grp = {
+  .name  = (const char*)"shdsl",
   .attrs = dev_dsl_attrs,
 };
 
 static const struct attribute_group *dev_attr_grps[] = {
   &dev_attr_grp,
-  &dev_dsl_attr_grp,
+  &dev_shdsl_attr_grp,
   NULL
 };
+
+static irqreturn_t irq_handler(int irq, void *dev_id)
+{
+  galeosdev_data_t *device_data = (galeosdev_data_t *)dev_id;
+  reg++;
+  return IRQ_HANDLED;
+}
+
+#define BUF_LEN 256
+static int read_file_settings(const char *file)
+{
+  struct file *filp;
+  struct inode *inode;
+  mm_segment_t fs;// = get_fs();
+  off_t fsize;
+  char *buff;
+  size_t n;
+  return 0;
+  buff = kmalloc( BUF_LEN, GFP_KERNEL );
+  strcpy( buff, GALEOS_FILE_SETTINGS );
+  filp = filp_open(buff, O_RDONLY, 0);
+  if( IS_ERR(filp) ) {
+    printk("Error open file: %s\n",buff);
+    return -1;
+  }
+  printk("File is opened");
+  fs = get_fs();
+  set_fs(get_ds());
+  if(1)//while(1)
+  {
+    filp->f_op->read(filp, buff, BUF_LEN, &(filp->f_pos));
+    //n = kernel_read( f, 0, buff, BUF_LEN );
+    printk("Read file: %s", buff);
+  }
+  set_fs(fs);
+  filp_close( filp, NULL );
+  kfree(buff);
+  return 0;
+}
 
 static int galeosspidev_probe(struct spi_device *spi)
 {
@@ -416,7 +565,7 @@ static int galeosspidev_probe(struct spi_device *spi)
   void *ptr;
   int status,number;
   // Check device is present
-  printk(KERN_EMERG "Galeos SPI Driver Probe...\n");
+  printk("Galeos SPI Driver Probe...\n");
   if (spi->dev.of_node && !of_match_device(galeos_of_match, &spi->dev)) {
     dev_err(&spi->dev, "buggy DT: device_data listed directly in DT\n");
     WARN_ON(spi->dev.of_node && !of_match_device(galeos_of_match, &spi->dev));
@@ -466,6 +615,7 @@ static int galeosspidev_probe(struct spi_device *spi)
   {
     device_data->spi_speed_hz = 1000000;
   }
+  mutex_init(&device_data->spi_lock);
   // Find and register GPIO-s for controling device  
   number = of_gpio_named_count(spi->dev.of_node, "galeos,gpio-ac");
   if(! IS_ERR(number))
@@ -503,29 +653,12 @@ static int galeosspidev_probe(struct spi_device *spi)
     gpio_export(device_data->gpio_rdy,true);
     gpio_direction_input(device_data->gpio_rdy);
   } else device_data->gpio_rdy = 0;
-
   if(1)
   {
-    struct file *f;
-    char *buff;
-    size_t n;
-#define BUF_LEN 256
-    buff = kmalloc( BUF_LEN, GFP_KERNEL );
-    strcpy( buff, "/etc/galeos/default.conf" );
-    f = filp_open(buff, O_RDONLY, 0);
-    if( ! IS_ERR( f ) ) {
-      printk("File is opened");
-      n = kernel_read( f, 0, buff, BUF_LEN );
-      printk("Read file: %s", buff);
-      filp_close( f, NULL );
-    }
-    kfree(buff);
+    device_data->irq = gpio_to_irq(device_data->gpio_irq);
+    request_irq(device_data->irq, irq_handler, IRQF_TRIGGER_FALLING , "short", device_data);
   }
-  mutex_init(&device_data->spi_lock);
-//  if (status == 0)
-//    spi_set_drvdata(spi, device_data);
-//  else
-
+  read_file_settings( GALEOS_FILE_SETTINGS );
   return status;
 }
 
@@ -533,7 +666,7 @@ static int daleosspidev_remove(struct spi_device *spi)
 {
   galeosdev_data_t *device_data = spi_get_drvdata(spi);
   /* make sure ops on existing fds can abort cleanly */
-  printk(KERN_EMERG "Galeos SPI Driver Remove...\n");
+  printk("Galeos SPI Driver Remove...\n");
   spi_dev_put(spi);
   spin_lock_irq(&device_data->spin_lock);
   device_data->spi = NULL;
@@ -553,8 +686,9 @@ static int daleosspidev_remove(struct spi_device *spi)
   list_del(&device_data->device_entry);
   device_destroy(galeos_class, device_data->devt);
   clear_bit(MINOR(device_data->devt), minors);
+  free_irq(device_data->irq, NULL);
   if (users == 0)
-  	kfree(device_data);
+    kfree(device_data);
   mutex_unlock(&device_list_lock);
   return 0;
 }
@@ -573,27 +707,27 @@ static int __init galeos_init(void){
   int ret = 0;
   dev_t dev;
   struct device *device;
-  printk(KERN_EMERG "Galeos Driver initialize (init)...\n");
+  printk("Galeos Driver initialize (init)...\n");
   workqueue = create_workqueue( GALEOS_WORKQUEUE_NAME );
   if(IS_ERR(workqueue))
   {
-    printk(KERN_EMERG "Galeos Driver init Workqueue faild...\n");
+    printk("Galeos Driver init Workqueue faild...\n");
     return -1;
   }
-  printk(KERN_EMERG "Galeos WorkQueue created\n");
+  printk("Galeos WorkQueue created\n");
   galeos_class = class_create(THIS_MODULE, GALEOS_CLASS_NAME);
   if(IS_ERR(galeos_class))
   {
-    printk(KERN_EMERG "Galeos Driver create class faild...\n");
+    printk("Galeos Driver create class faild...\n");
     flush_workqueue( workqueue );
     return -1;
   }
-  printk(KERN_EMERG "Galeos Class created\n");
+  printk("Galeos Class created\n");
   ret = spi_register_driver(&galeos_spi_driver);
-  printk(KERN_EMERG "Galeos driver registered\n");
+  printk("Galeos driver registered\n");
   if(IS_ERR(ret))
   {
-    printk(KERN_EMERG "Galeos Driver register spi driver faild...\n");
+    printk("Galeos Driver register spi driver faild...\n");
     flush_workqueue( workqueue );
     destroy_workqueue( workqueue );
     class_destroy(galeos_class);
@@ -604,7 +738,7 @@ static int __init galeos_init(void){
 
 
 static void __exit galeos_exit(void){
-  printk(KERN_EMERG "Galeos Driver deinicialize (exit)...\n");
+  printk("Galeos Driver deinicialize (exit)...\n");
   flush_workqueue( workqueue );
   destroy_workqueue( workqueue );
   spi_unregister_driver(&galeos_spi_driver);
