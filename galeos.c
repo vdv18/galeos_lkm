@@ -12,7 +12,6 @@ MODULE_VERSION("0.1");
 
 static int users = 0;
 static int major = 0;
-static unsigned int reg = 0;
 
 module_param( major, int, S_IRUGO );
 static DECLARE_BITMAP(minors, 32);
@@ -120,20 +119,22 @@ static ssize_t show_device_type(struct device *dev, struct device_attribute *att
 
 static ssize_t show_reg(struct device *dev, struct device_attribute *attr, char *buf)
 {
-  return scnprintf(buf, PAGE_SIZE, "%02X\n", reg);
+  galeosdev_data_t *device_data = dev_get_drvdata(dev);
+  return scnprintf(buf, PAGE_SIZE, "%02X\n", device_data->reg);
 }
 
 static ssize_t store_reg(struct device *dev, struct device_attribute *attr, 
                          const char *buf, size_t count)
 {
-  sscanf(buf,"%02X",&reg);
+  galeosdev_data_t *device_data = dev_get_drvdata(dev);
+  sscanf(buf,"%02X",&device_data->reg);
   return strlen(buf);;
 }
 
 static ssize_t show_data(struct device *dev, struct device_attribute *attr, char *buf)
 {
   galeosdev_data_t *device_data = dev_get_drvdata(dev);
-  u8 data =  galeos_register_read(device_data, (u8)(reg&0xFF));
+  u8 data =  galeos_register_read(device_data, (u8)(device_data->reg&0xFF));
   return scnprintf(buf, PAGE_SIZE, "%02X\n", (int)data);
 }
 
@@ -143,7 +144,7 @@ static ssize_t store_data(struct device *dev, struct device_attribute *attr,
   unsigned int data;
   galeosdev_data_t *device_data = dev_get_drvdata(dev);
   sscanf(buf,"%02X",&data);
-  galeos_register_write(device_data, (u8)(reg&0xFF), (u8)(data&0xFF));
+  galeos_register_write(device_data, (u8)(device_data->reg&0xFF), (u8)(data&0xFF));
   return strlen(buf);;
 }
 
@@ -522,7 +523,7 @@ static const struct attribute_group *dev_attr_grps[] = {
 static irqreturn_t irq_handler(int irq, void *dev_id)
 {
   galeosdev_data_t *device_data = (galeosdev_data_t *)dev_id;
-  reg++;
+  device_data->reg++;
   return IRQ_HANDLED;
 }
 

@@ -36,7 +36,8 @@ typedef struct galeos_data_s {
   int gpio_rdy;
   /* IRQ*/
   int irq;
-  /**/
+  /* register */
+  unsigned int reg;
   int id;
 } galeosdev_data_t;
 
